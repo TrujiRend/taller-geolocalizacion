@@ -81,8 +81,7 @@ mapa.on('click', (e) => {
   agregarVertice(e.latlng.lat, e.latlng.lng);
 });
 
-// Reto 4. Agregar un vértice con la ubicación actual del usuario
-// Reutiliza la geolocalización del Paso 3 para agregar un vértice con la posición actual
+// Reto 4. Reutiliza la geolocalización del Paso 3 para agregar un vértice con la posición actual
 function agregarVerticeAqui() {
   if (poligono) {
     mostrarInfo('El polígono ya está cerrado. Usa Limpiar para empezar de nuevo.');
@@ -267,8 +266,7 @@ document.getElementById('archivoGeoJSON').addEventListener('change', (e) => {
   lector.readAsText(archivo);
 });
 
-// Reto 7. Detectar si la ubicación del usuario está dentro o fuera del polígono
-// Usa la posición actual para saber si el usuario está dentro o fuera del polígono
+// Reto 7. Usa la posición actual para saber si el usuario está dentro o fuera del polígono
 function verificarDentroPoligono() {
   if (!poligono) {
     mostrarInfo('Primero cierra el polígono para poder verificar tu ubicación.');
