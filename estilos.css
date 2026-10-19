@@ -1,0 +1,18 @@
+body { margin: 0; font-family: system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; }
+header { padding: 10px 16px; background: #1e3a5f; color: white; }
+h1 { margin: 0 0 8px; font-size: 1.3rem; }
+.controles { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.etiquetaColor { display: flex; align-items: center; gap: 6px; font-size: .9rem; }
+.etiquetaColor input[type="color"] { width: 32px; height: 28px; padding: 0; border: none; border-radius: 4px; cursor: pointer; }
+#nombrePoligono { padding: 6px 10px; border: none; border-radius: 4px; font-size: .9rem; }
+.etiquetaArchivo { display: flex; align-items: center; gap: 6px; font-size: .9rem; }
+.etiquetaArchivo input[type="file"] { max-width: 180px; font-size: .8rem; color: white; }
+button { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+#info { margin: 8px 0 0; font-size: .9rem; }
+#mapa { flex: 1; }
+
+#panelVertices { max-height: 160px; overflow-y: auto; border-bottom: 1px solid #ccc; }
+#tablaVertices { width: 100%; border-collapse: collapse; font-size: .85rem; }
+#tablaVertices th, #tablaVertices td { padding: 4px 10px; text-align: left; border-bottom: 1px solid #eee; }
+#tablaVertices thead { background: #f1f4f8; position: sticky; top: 0; }
