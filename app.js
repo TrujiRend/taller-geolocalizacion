@@ -3,19 +3,21 @@ const CENTRO_INICIAL = [5.0689, -75.5174]; // Manizales, por si falla la ubicaci
 
 const mapa = L.map('mapa').setView(CENTRO_INICIAL, 15);
 
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
-  attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ'
+  attribution: '&copy; OpenStreetMap contributors'
 }).addTo(mapa);
 
 // Paso 3. Geolocalización
 let marcadorUsuario = null;
 let circuloPrecision = null;
 
+// Actualiza el texto de estado que ve el usuario
 function mostrarInfo(texto) {
   document.getElementById('info').textContent = texto;
 }
 
+// Traduce el código de error de geolocalización a un mensaje legible
 function mensajeErrorGeo(err) {
   const mensajes = {
     1: 'Permiso denegado. Activa la ubicación en el navegador.',
@@ -25,6 +27,7 @@ function mensajeErrorGeo(err) {
   return mensajes[err.code] || 'Error desconocido.';
 }
 
+// Pide la ubicación del usuario y dibuja su marcador y círculo de precisión
 function ubicarUsuario() {
   if (!('geolocation' in navigator)) {
     mostrarInfo('Tu navegador no soporta geolocalización.');
@@ -59,6 +62,7 @@ let vertices = []; // marcadores visibles de cada vértice
 let poligono = null;
 const lineaGuia = L.polyline([], { color: '#e67e22', dashArray: '6 6' }).addTo(mapa);
 
+// Agrega un vértice al array de puntos y lo dibuja en el mapa y la tabla
 function agregarVertice(lat, lng) {
   puntos.push([lat, lng]);
 
@@ -78,6 +82,7 @@ mapa.on('click', (e) => {
 });
 
 // Reto 4. Agregar un vértice con la ubicación actual del usuario
+// Reutiliza la geolocalización del Paso 3 para agregar un vértice con la posición actual
 function agregarVerticeAqui() {
   if (poligono) {
     mostrarInfo('El polígono ya está cerrado. Usa Limpiar para empezar de nuevo.');
@@ -98,6 +103,7 @@ function agregarVerticeAqui() {
 
 document.getElementById('btnAgregarAqui').addEventListener('click', agregarVerticeAqui);
 
+// Habilita o deshabilita los botones según el estado actual de puntos/polígono
 function actualizarBotones() {
   document.getElementById('btnCerrar').disabled = puntos.length < 3 || poligono !== null;
   document.getElementById('btnDeshacer').disabled = puntos.length === 0 || poligono !== null;
@@ -134,6 +140,7 @@ function aGeoJSON() {
   return turf.polygon([anillo], { nombre, creado: new Date().toISOString() });
 }
 
+// Calcula área (m²) y perímetro (m) del polígono con Turf.js
 function medir() {
   const geo = aGeoJSON();
   const area = turf.area(geo); // metros cuadrados
@@ -141,6 +148,7 @@ function medir() {
   return { area, perimetro };
 }
 
+// Dibuja el polígono final, lo mide y muestra el resultado en un popup
 function cerrarPoligono() {
   const color = document.getElementById('colorPoligono').value;
   poligono = L.polygon(puntos, { color, fillOpacity: 0.35 }).addTo(mapa);
@@ -170,6 +178,7 @@ document.getElementById('colorPoligono').addEventListener('input', (e) => {
 });
 
 // Paso 6. Deshacer y limpiar
+// Quita el último vértice agregado
 function deshacerPunto() {
   puntos.pop();
   mapa.removeLayer(vertices.pop());
@@ -180,6 +189,7 @@ function deshacerPunto() {
   mostrarInfo(`${puntos.length} vértice(s).`);
 }
 
+// Borra todos los vértices, la línea guía y el polígono cerrado (si existe)
 function limpiar() {
   puntos = [];
   vertices.forEach((v) => mapa.removeLayer(v));
@@ -199,6 +209,7 @@ document.getElementById('btnDeshacer').addEventListener('click', deshacerPunto);
 document.getElementById('btnLimpiar').addEventListener('click', limpiar);
 
 // Paso 7. Exportar a GeoJSON
+// Descarga el polígono actual como archivo .geojson
 function exportar() {
   const texto = JSON.stringify(aGeoJSON(), null, 2);
   const blob = new Blob([texto], { type: 'application/geo+json' });
@@ -214,10 +225,12 @@ document.getElementById('btnExportar').addEventListener('click', exportar);
 // Reto 5. Guardar el polígono en localStorage y recuperarlo al recargar
 const CLAVE_PUNTOS = 'geocolocalizacion.puntos';
 
+// Guarda el array de puntos en localStorage como texto JSON
 function guardarEnLocalStorage() {
   localStorage.setItem(CLAVE_PUNTOS, JSON.stringify(puntos));
 }
 
+// Recupera los puntos guardados (si existen) y los vuelve a dibujar
 function cargarDeLocalStorage() {
   const guardado = localStorage.getItem(CLAVE_PUNTOS);
   if (!guardado) return;
@@ -234,6 +247,7 @@ cargarDeLocalStorage();
 // Reto 6. Importar un archivo .geojson y dibujarlo en el mapa
 let capaImportada = null;
 
+// Lee el archivo .geojson elegido y lo dibuja sobre el mapa
 document.getElementById('archivoGeoJSON').addEventListener('change', (e) => {
   const archivo = e.target.files[0];
   if (!archivo) return;
@@ -254,6 +268,7 @@ document.getElementById('archivoGeoJSON').addEventListener('change', (e) => {
 });
 
 // Reto 7. Detectar si la ubicación del usuario está dentro o fuera del polígono
+// Usa la posición actual para saber si el usuario está dentro o fuera del polígono
 function verificarDentroPoligono() {
   if (!poligono) {
     mostrarInfo('Primero cierra el polígono para poder verificar tu ubicación.');
@@ -283,6 +298,7 @@ document.getElementById('btnDentroFuera').addEventListener('click', verificarDen
 let idVigilancia = null;
 let dentroActual = null;
 
+// Rastrea la posición del usuario en tiempo real y avisa al cruzar el borde del polígono
 function iniciarGeocerca() {
   if (!poligono) {
     mostrarInfo('Primero cierra el polígono para activar la geocerca.');
@@ -315,6 +331,7 @@ function iniciarGeocerca() {
   );
 }
 
+// Detiene el rastreo iniciado por iniciarGeocerca()
 function detenerGeocerca() {
   navigator.geolocation.clearWatch(idVigilancia);
   idVigilancia = null;
